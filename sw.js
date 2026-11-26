@@ -1,4 +1,4 @@
-const CACHE_NAME = 'sky-obby-3d-v2';
+const CACHE_NAME = 'sky-obby-3d-v3';
 const ASSETS = [
   './',
   './index.html',
