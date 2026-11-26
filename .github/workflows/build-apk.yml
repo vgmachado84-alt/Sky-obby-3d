@@ -1,0 +1,58 @@
+name: Gerar APK
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: android-actions/setup-android@v3
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+
+      - name: Copiar o jogo para dentro do app (com three.js offline)
+        run: |
+          WWW=android/app/src/main/assets/www
+          mkdir -p "$WWW"
+          cp index.html manifest.json icon.svg icon-192.png icon-512.png "$WWW"/
+          curl -fsSL https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js -o "$WWW/three.min.js"
+          sed -i 's#https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js#three.min.js#' "$WWW/index.html"
+          grep -n 'three.min.js' "$WWW/index.html"
+
+      - name: Compilar APK
+        working-directory: android
+        env:
+          VERSION_CODE: ${{ github.run_number }}
+        run: gradle assembleRelease --no-daemon --stacktrace
+
+      - name: Renomear APK
+        run: cp android/app/build/outputs/apk/release/app-release.apk SkyObby3D.apk
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: SkyObby3D-apk
+          path: SkyObby3D.apk
+
+      - name: Publicar na página de Releases
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v1.0.${{ github.run_number }}
+          name: Sky Obby 3D v1.0.${{ github.run_number }}
+          body: Toque em SkyObby3D.apk abaixo para baixar e instalar no Android.
+          files: SkyObby3D.apk
+          make_latest: true

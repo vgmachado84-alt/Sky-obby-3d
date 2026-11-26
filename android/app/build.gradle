@@ -1,0 +1,37 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.vgmachado.skyobby3d'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId 'com.vgmachado.skyobby3d'
+        minSdk 24
+        targetSdk 34
+        versionCode Integer.parseInt(System.getenv('VERSION_CODE') ?: '1')
+        versionName "1.0." + (System.getenv('VERSION_CODE') ?: '1')
+    }
+
+    signingConfigs {
+        release {
+            storeFile file('skyobby.keystore')
+            storePassword 'skyobby123'
+            keyAlias 'skyobby'
+            keyPassword 'skyobby123'
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            signingConfig signingConfigs.release
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
